@@ -114,6 +114,6 @@ class LayerNormalization(nn.Module):
         :return: Output tensor of shape (batch_size, seq_len, d_model)
         """
         mean = x.mean(-1, keepdim=True)
-        std = x.std(-1, keepdim=True, unbiased=False) # unbiases False guarantees dividing by N matching as pytorch does
+        std = x.std(-1, keepdim=True, unbiased=False) # unbiased False guarantees dividing by N.
         return self.gamma * (x - mean) / (std + self.eps) + self.beta
 
