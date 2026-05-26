@@ -93,7 +93,7 @@ class PositionalEncoding(nn.Module):
 
 class LayerNormalization(nn.Module):
 
-    def __init__(self, d_model: int, eps=1e-6):
+    def __init__(self, d_model: int, eps: float=1e-6):
         super().__init__()
         self.eps = eps
         # Layer Normalization parameters. One parameter for each dimension.
@@ -117,3 +117,28 @@ class LayerNormalization(nn.Module):
         std = x.std(-1, keepdim=True, unbiased=False) # unbiased False guarantees dividing by N.
         return self.gamma * (x - mean) / (std + self.eps) + self.beta
 
+
+class FeedForward(nn.Module):
+
+    def __init__(self, d_model: int, d_ff: int=2048, dropout=0.1):
+        """
+        The paper states that a position-wise feed forward network is used.
+        The network is applied to each position of the sequence separately and the network consist in two layers
+        with relu activations.
+        The network maps each token representation to a higher dimension to then reduce it again to the original
+        dimension.
+        :param d_model: The d_model dimension of the transformer.
+        :param d_ff: The dimension to which the feed-forward network maps the d_model dimension in the middle layer.
+        :param dropout:
+        """
+        super().__init__()
+        self.linear = nn.Linear(d_model, d_ff)
+        self.dropout = nn.Dropout(dropout)
+        self.activation = nn.ReLU()
+        self.out_linear = nn.Linear(d_ff, d_model)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+
+        x = self.activation(self.linear(x))
+        x = self.dropout(x)
+        return self.out_linear(x)
